@@ -12,6 +12,7 @@ This is the official repository for our ECCV2024 paper **CoR-GS: Sparse-View 3D 
 
 ## TODO
 - [x] scripts for LLFF.
+
 - [] scripts for Mipnerf360, DTU, Blender datasets.
 
 ## Installation
