@@ -21,3 +21,6 @@ data/dtu/*
 data/llff/*
 data/nerf_synthetic/*
 !*.gitkeep
+
+
+run_scripts*

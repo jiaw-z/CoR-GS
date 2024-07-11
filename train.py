@@ -113,7 +113,7 @@ def training(dataset, opt, pipe, args):
         if (iteration - 1) == debug_from:
             pipe.debug = True
 
-        # Every 500 its we increase the levels of SH up to a maximum degree
+        # Every 1000 its we increase the levels of SH up to a maximum degree
         if iteration % 500 == 0:
             for i in range(args.gaussiansN):
                 GsDict[f"gs{i}"].oneupSHdegree()
@@ -167,7 +167,6 @@ def training(dataset, opt, pipe, args):
                 if not pseudo_stack_co:
                     pseudo_stack_co = scene.getPseudoCameras().copy()
                 pseudo_cam_co = pseudo_stack_co.pop(randint(0, len(pseudo_stack_co) - 1))
-                pseudo_cam_co.intr = viewpoint_cam.intr
 
                 for i in range(args.gaussiansN):
                         RenderDict[f"render_pkg_pseudo_co_gs{i}"] = render(pseudo_cam_co, GsDict[f'gs{i}'], pipe, bg)
@@ -226,6 +225,7 @@ def training(dataset, opt, pipe, args):
                 # density and prune
                 if iteration > opt.densify_from_iter and iteration % opt.densification_interval == 0:
                     size_threshold = None
+                    # size_threshold = 20 if iteration > opt.opacity_reset_interval else None
 
                     for i in range(args.gaussiansN):
 
@@ -241,10 +241,10 @@ def training(dataset, opt, pipe, args):
                 GsDict[f"gs{i}"].update_learning_rate(iteration)
                 if (iteration - args.start_sample_pseudo - 1) % opt.opacity_reset_interval == 0 and \
                         iteration > args.start_sample_pseudo:
+                # if iteration % opt.opacity_reset_interval == 0 or (dataset.white_background and iteration == opt.densify_from_iter):
                     print(f"reset opacity of gaussians-{i} at iteration {iteration}")
                     GsDict[f"gs{i}"].reset_opacity()
                     
-            # if args.coprune and iteration > opt.densify_from_iter and iteration % opt.densification_interval == 0:
             if args.coprune and iteration > opt.densify_from_iter and iteration % 500 == 0:
                 for i in range(args.gaussiansN):
                     for j in range(args.gaussiansN):
@@ -318,15 +318,15 @@ def training_report(args, tb_writer, iteration, loss, l1_loss, testing_iteration
                     render_results = renderFunc(viewpoint, scene.gaussians, *renderArgs)
                     render_image = torch.clamp(render_results["render"], 0.0, 1.0)
 
-                    depth_render = render_results["depth"]
-                    depth_render_image = depth2image(depth_render, rgb=depth_rgb)
+                    render_depth = render_results["depth"]
+                    render_depth_image = depth2image(render_depth, rgb=depth_rgb)
                     alpha = render_results["alpha"]
                     gt_image = torch.clamp(viewpoint.original_image.to("cuda"), 0.0, 1.0)                  
 
 
                     if tb_writer and (idx < 8):
                         tb_writer.add_images(config['name'] + "_view_{}/render_image".format(viewpoint.image_name), render_image[None], global_step=iteration)
-                        tb_writer.add_images(config['name'] + "_view_{}/depth_render".format(viewpoint.image_name), depth_render_image[None], global_step=iteration)
+                        tb_writer.add_images(config['name'] + "_view_{}/render_depth".format(viewpoint.image_name), render_depth_image[None], global_step=iteration)
                         tb_writer.add_images(config['name'] + "_view_{}/alpha".format(viewpoint.image_name), alpha[None], global_step=iteration)
 
                         if iteration == testing_iterations[0]:
