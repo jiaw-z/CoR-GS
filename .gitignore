@@ -13,14 +13,7 @@ tensorboard_3d
 screenshots
 
 
-data/*
-!data/dtu
-!data/nerf_llff_data
-!data/nerf_synthetic
-data/dtu/*
-data/nerf_llff_data/*
-data/nerf_synthetic/*
-!*.gitkeep
+data*
 
 
 run_scripts*
