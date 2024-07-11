@@ -37,6 +37,7 @@ conda activate corgs
    ```bash
    # for example
    bash scripts/run_llff.sh ${gpu_id} data/nerf_llff_data/fern output/llff/fern
+   ```
 
 
 
