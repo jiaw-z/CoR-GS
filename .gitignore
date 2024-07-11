@@ -15,10 +15,10 @@ screenshots
 
 data/*
 !data/dtu
-!data/llff
+!data/nerf_llff_data
 !data/nerf_synthetic
 data/dtu/*
-data/llff/*
+data/nerf_llff_data/*
 data/nerf_synthetic/*
 !*.gitkeep
 
