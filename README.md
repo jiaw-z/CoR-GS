@@ -24,7 +24,14 @@ conda env create --file environment.yml
 conda activate corgs
 ``````
 
-
+## Required Data
+```
+├── /data
+    ├── nerf_llff_data
+        ├── fern
+        ├── flower
+        ├── ...
+```
 
 ## Evaluation
 
