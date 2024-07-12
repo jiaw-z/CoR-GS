@@ -130,8 +130,7 @@ def round_python3(number):
 
 def pipeline(scene, base_path, n_views):
     llffhold = 8
-    # view_path = str(n_views) + '_views_sparse__'
-    view_path = str(n_views) + '_views_'
+    view_path = str(n_views) + '_views'
     os.chdir(base_path + scene)
     os.system('rm -r ' + view_path)
     os.mkdir(view_path)
@@ -165,7 +164,6 @@ def pipeline(scene, base_path, n_views):
         idx_sub = [round_python3(i) for i in np.linspace(0, len(train_img_list)-1, n_views)]
         train_img_list = [c for idx, c in enumerate(train_img_list) if idx in idx_sub]
 
-    print(f"train_img_list is {train_img_list}")
 
     for img_name in train_img_list:
         os.system('cp ../images/' + img_name + '  images/' + img_name)
@@ -175,7 +173,6 @@ def pipeline(scene, base_path, n_views):
         pass
 
     res = os.popen( 'colmap feature_extractor --database_path database.db --image_path images  --SiftExtraction.max_image_size 4032 --SiftExtraction.max_num_features 16384 --SiftExtraction.estimate_affine_shape 1 --SiftExtraction.domain_size_pooling 1').read()
-    print(f"feature load")
     os.system( 'colmap exhaustive_matcher --database_path database.db --SiftMatching.guided_matching 1 --SiftMatching.max_num_matches 32768')
     db = COLMAPDatabase.connect('database.db')
     db_images = db.execute("SELECT * FROM images")
@@ -194,11 +191,6 @@ def pipeline(scene, base_path, n_views):
     os.system('colmap stereo_fusion --workspace_path dense --output_path dense/fused.ply')
 
 
-# for scene in ['bicycle', 'bonsai', 'counter', 'garden',  'kitchen', 'room', 'stump']:
-# for scene in ['bicycle', 'bonsai', 'counter', 'garden', 'kitchen', 'room', 'stump']:
-scene = 'garden'
-pipeline(scene, base_path = 'data/mipnerf360/', n_views = 24)
-# pipeline(scene, base_path = 'data/mipnerf360/', n_views = 12)
-
-
+for scene in ['bicycle', 'bonsai', 'counter', 'garden',  'kitchen', 'room', 'stump']:
+    pipeline(scene, base_path = '/data/mipnerf360/', n_views = 24)  # please use absolute path!
 

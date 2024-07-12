@@ -10,11 +10,6 @@ This is the official repository for our ECCV2024 paper **CoR-GS: Sparse-View 3D 
 3D Gaussian Splatting (3DGS) creates a radiance field consisting of 3D Gaussians to represent a scene. With sparse training views, 3DGS easily suffers from overfitting, negatively impacting rendering. This paper introduces a new co-regularization perspective for improving sparse-view 3DGS. When training two 3D Gaussian radiance fields, we observe that the two radiance fields exhibit point disagreement and rendering disagreement that can unsupervisedly predict reconstruction quality, stemming from the randomness of densification implementation. We further quantify the two disagreements and demonstrate the negative correlation between them and accurate reconstruction, which allows us to identify inaccurate reconstruction without accessing ground-truth information. Based on the study, we propose CoR-GS, which identifies and suppresses inaccurate reconstruction based on the two disagreements: (1) Co-pruning considers Gaussians that exhibit high point disagreement in inaccurate positions and prunes them. (2) Pseudo-view co-regularization considers pixels that exhibit high rendering disagreement are inaccurate and suppress the disagreement. Results on LLFF, Mip-NeRF360, DTU, and Blender demonstrate that CoR-GS effectively regularizes the scene geometry, reconstructs the compact representations, and achieves state-of-the-art novel view synthesis quality under sparse training views. 
 
 
-## TODO
-- [x] scripts for LLFF.
-
-- [ ] scripts for Mipnerf360, DTU, Blender datasets.
-
 ## Installation
 
 Tested on Ubuntu 18.04, CUDA 11.3, PyTorch 1.12.1
@@ -27,6 +22,10 @@ conda activate corgs
 ## Required Data
 ```
 ├── /data
+    ├── mipnerf360
+        ├── bicycle
+        ├── bonsai
+        ├── ...
     ├── nerf_llff_data
         ├── fern
         ├── flower
@@ -39,11 +38,32 @@ conda activate corgs
 
 1. Download LLFF from [the official download link](https://drive.google.com/drive/folders/128yBriW1IG_3NJ5Rp7APSTZsJqdJdfc1).
 
-2. Start training and testing:
+2. run colmap to obtain initial point clouds with limited viewpoints
+    ```bash
+   python tools/colmap_llff.py
+   ```
+
+3. Start training and testing:
 
    ```bash
    # for example
    bash scripts/run_llff.sh ${gpu_id} data/nerf_llff_data/fern output/llff/fern
+   ```
+
+### MipNeRF-360
+
+1. Download MipNeRF-360 from [the official download link](http://storage.googleapis.com/gresearch/refraw360/360_v2.zip).
+
+2. run colmap to obtain initial point clouds with limited viewpoints
+    ```bash
+   python tools/colmap_360.py
+   ```
+
+3. Start training and testing:
+
+   ```bash
+   # for example
+   bash scripts/run_360.sh ${gpu_id} data/mipnerf360/bicycle output/mipnerf360/bicycle
    ```
 
 
