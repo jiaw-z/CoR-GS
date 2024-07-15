@@ -19,6 +19,11 @@ conda env create --file environment.yml
 conda activate corgs
 ``````
 
+``````
+pip install gaussian-splatting/submodules/diff-gaussian-rasterization-confidence
+pip install gaussian-splatting/submodules/simple-knn
+``````
+
 ## Required Data
 ```
 ├── /data
