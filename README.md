@@ -43,7 +43,7 @@ pip install gaussian-splatting/submodules/simple-knn
 
 1. Download LLFF from [the official download link](https://drive.google.com/drive/folders/128yBriW1IG_3NJ5Rp7APSTZsJqdJdfc1).
 
-2. run colmap to obtain initial point clouds with limited viewpoints
+2. run colmap to obtain initial point clouds with limited viewpoints:
     ```bash
    python tools/colmap_llff.py
    ```
@@ -59,7 +59,7 @@ pip install gaussian-splatting/submodules/simple-knn
 
 1. Download MipNeRF-360 from [the official download link](http://storage.googleapis.com/gresearch/refraw360/360_v2.zip).
 
-2. run colmap to obtain initial point clouds with limited viewpoints
+2. run colmap to obtain initial point clouds with limited viewpoints:
     ```bash
    python tools/colmap_360.py
    ```
@@ -69,6 +69,43 @@ pip install gaussian-splatting/submodules/simple-knn
    ```bash
    # for example
    bash scripts/run_360.sh ${gpu_id} data/mipnerf360/bicycle output/mipnerf360/bicycle
+   ```
+
+
+
+### DTU
+
+1. Download DTU dataset
+
+   - Download the DTU dataset "Rectified (123 GB)" from the [official website](https://roboimagedata.compute.dtu.dk/?page_id=36/), and extract it.
+   - Download masks (used for evaluation only) from [this link](https://drive.google.com/file/d/1Yt5T3LJ9DZDiHbtd9PDFNHqJAd7wt-_E/view?usp=sharing).
+
+
+2. Organize DTU for few-shot setting:
+
+   ```bash
+   bash scripts/organize_dtu_dataset.sh $rectified_path
+   ```
+
+3. Format
+   - Poses: following [gaussian-splatting](https://github.com/graphdeco-inria/gaussian-splatting), run `convert.py` to get the poses and the undistorted images by COLMAP.
+   - Render Path: following [LLFF](https://github.com/Fyusion/LLFF) to get the `poses_bounds.npy` from the COLMAP data.
+
+4. Set the mask path and the expected output model path in `copy_mask_dtu.sh` for evaluation. (default: "data/DTU/submission_data/idrmasks" and "output/DTU") 
+
+
+5. run colmap to obtain initial point clouds with limited viewpoints:
+    ```bash
+   python tools/colmap_dtu.py
+   ```
+   When sparse views are used as input, COLMAP may fail due to poor co-visibility relationships between input images. In our tests, this issue can occur in some scenes within the 3-view DTU and 8-view Blender datasets. In these cases, we use random point clouds for initialization (--rand_pcd).
+
+
+6. Start training and testing:
+
+   ```bash
+   # for example
+   bash scripts/run_dtu.sh ${gpu_id} data/DTU/scan8 output/DTU/scan8
    ```
 
 
