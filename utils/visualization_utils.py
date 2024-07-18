@@ -74,7 +74,7 @@ depth_curve_fn = lambda x: -np.log(x + np.finfo(np.float32).eps)
 
 
 
-def depth2image(depth, inverse=True, rgb=True, bg_mask=None, alpha=1.0):
+def depth2image(depth, inverse=False, rgb=True, bg_mask=None, alpha=1.0):
     if bg_mask is None:
         norm_min = depth.min()
         norm_max = depth.max()

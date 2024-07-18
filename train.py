@@ -14,6 +14,7 @@ try:
 except ImportError:
     TENSORBOARD_FOUND = False
 
+import torchvision
 import numpy as np
 import matplotlib.cm as cm
 import os
@@ -89,6 +90,11 @@ def training(dataset, opt, pipe, args):
 
     viewpoint_stack, pseudo_stack = None, None
     pseudo_stack_co = None
+
+
+    trainCameras = scene.getTrainCameras().copy()
+    testCameras = scene.getTestCameras().copy()
+    allCameras = trainCameras + testCameras
 
     ema_loss_for_log = 0.0
     first_iter += 1
@@ -188,6 +194,37 @@ def training(dataset, opt, pipe, args):
         loss = LossDict["loss_gs0"]
         for i in range(args.gaussiansN):
             LossDict[f"loss_gs{i}"].backward()
+
+        if args.save_log_images and (iteration % 100 == 0):
+            with torch.no_grad():
+                eval_cam = allCameras[random.randint(0, len(allCameras) -1)]
+                # render_results = render(eval_cam, scene.gaussians, pipe, bg, return_depth=True, return_normal=True, return_opacity=True)
+                render_results = render(viewpoint_cam, GsDict[f'gs{i}'], pipe, bg)
+                # RenderDict[f"render_pkg_gs{i}"] = render(viewpoint_cam, GsDict[f'gs{i}'], pipe, bg)
+
+                image = torch.clamp(render_results["render"], 0.0, 1.0)
+                # print(f"image.shape is {image.shape}")
+                gt_image = torch.clamp(eval_cam.original_image.to("cuda"), 0.0, 1.0)
+                black = torch.zeros_like(gt_image).to(gt_image.device)
+
+                render_depth = render_results["depth"]
+                # print(f"render_depth.shape is {render_depth.shape}")
+                render_depth_image = depth2image(render_depth, inverse=True, rgb=True)
+
+                # render_normal = render_results["render_normal"]
+                # render_normal_image = normal2image(render_normal, inverse=True)
+                # print(f"alpha.shape is {render_results['alpha'].shape}")
+                render_opacity_image = render_results["alpha"].repeat(3, 1, 1)
+
+            row0 = torch.cat([gt_image, black, black], dim=2)
+            row1 = torch.cat([image, render_depth_image, render_opacity_image], dim=2)
+            
+            image_to_show = torch.cat([row0, row1], dim=1)
+            image_to_show = torch.clamp(image_to_show, 0, 1)
+            
+            os.makedirs(f"{dataset.model_path}/log_images_train", exist_ok = True)
+            torchvision.utils.save_image(image_to_show, f"{dataset.model_path}/log_images_train/{iteration}.jpg")
+
         with torch.no_grad():
             # Progress bar
             ema_loss_for_log = 0.4 * loss.item() + 0.6 * ema_loss_for_log
@@ -319,15 +356,29 @@ def training_report(args, tb_writer, iteration, loss, l1_loss, testing_iteration
                     render_image = torch.clamp(render_results["render"], 0.0, 1.0)
 
                     render_depth = render_results["depth"]
-                    render_depth_image = depth2image(render_depth, rgb=depth_rgb)
+                    render_depth_image = depth2image(render_depth, inverse=True, rgb=depth_rgb)
                     alpha = render_results["alpha"]
-                    gt_image = torch.clamp(viewpoint.original_image.to("cuda"), 0.0, 1.0)                  
+                    render_opacity_image = render_results["alpha"].repeat(3, 1, 1)
+                    gt_image = torch.clamp(viewpoint.original_image.to("cuda"), 0.0, 1.0)   
+                    black = torch.zeros_like(gt_image).to(gt_image.device) 
+
+                               
 
 
                     if tb_writer and (idx < 8):
+                        row0 = torch.cat([gt_image, black, black], dim=2)
+                        row1 = torch.cat([render_image, render_depth_image, render_opacity_image], dim=2)
+                        
+                        image_to_show = torch.cat([row0, row1], dim=1)
+                        image_to_show = torch.clamp(image_to_show, 0, 1)
+                        
+                        save_path = f"{args.model_path}/save_images_{config['name']}/view_{viewpoint.image_name}"
+                        os.makedirs(save_path, exist_ok = True)
+                        torchvision.utils.save_image(image_to_show, save_path + f"/{iteration}.jpg") 
+
                         tb_writer.add_images(config['name'] + "_view_{}/render_image".format(viewpoint.image_name), render_image[None], global_step=iteration)
-                        tb_writer.add_images(config['name'] + "_view_{}/render_depth".format(viewpoint.image_name), render_depth_image[None], global_step=iteration)
-                        tb_writer.add_images(config['name'] + "_view_{}/alpha".format(viewpoint.image_name), alpha[None], global_step=iteration)
+                        # tb_writer.add_images(config['name'] + "_view_{}/render_depth".format(viewpoint.image_name), render_depth_image[None], global_step=iteration)
+                        # tb_writer.add_images(config['name'] + "_view_{}/alpha".format(viewpoint.image_name), alpha[None], global_step=iteration)
 
                         if iteration == testing_iterations[0]:
                             tb_writer.add_images(config['name'] + "_view_{}/ground_truth".format(viewpoint.image_name), gt_image[None], global_step=iteration)
@@ -372,7 +423,7 @@ if __name__ == "__main__":
     parser.add_argument('--detect_anomaly', action='store_true', default=False)
 
     parser.add_argument("--configs", type=str, default = "")
-    parser.add_argument("--test_iterations", nargs="+", type=int, default=[2000, 5000, 7000, 10000, 30000])
+    parser.add_argument("--test_iterations", nargs="+", type=int, default=[500, 2000, 3000, 5000, 7000, 15000, 30000])
     parser.add_argument("--save_iterations", nargs="+", type=int, default=[10000, 30000])
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[10_000])
@@ -387,6 +438,8 @@ if __name__ == "__main__":
     parser.add_argument("--coreg", action='store_true', default=False)
     parser.add_argument("--coprune", action='store_true', default=False)
     parser.add_argument('--coprune_threshold', type=int, default=5)
+
+    parser.add_argument("--save_log_images", action="store_true")
 
     args = parser.parse_args(sys.argv[1:])
     args.save_iterations.append(args.iterations)

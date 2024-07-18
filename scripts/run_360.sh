@@ -12,7 +12,7 @@ python train.py \
 --densify_grad_threshold 0.0005 \
 --gaussiansN 2 \
 --coprune --coprune_threshold 20 \
---coreg --sample_pseudo_interval 1 --start_sample_pseudo 500 --end_sample_pseudo 30000 \
+--coreg --sample_pseudo_interval 1 --start_sample_pseudo 500 --end_sample_pseudo 30000
 
 
 python render.py \

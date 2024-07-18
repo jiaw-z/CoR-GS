@@ -11,7 +11,7 @@ python train.py \
 --densify_grad_threshold 0.0005 \
 --gaussiansN 2 \
 --coprune --coprune_threshold 10 \
---coreg --sample_pseudo_interval 1 --start_sample_pseudo 2000 \
+--coreg --sample_pseudo_interval 1 --start_sample_pseudo 2000
 
 bash ./scripts/copy_mask_dtu.sh
 
