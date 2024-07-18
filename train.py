@@ -198,28 +198,26 @@ def training(dataset, opt, pipe, args):
         if args.save_log_images and (iteration % 100 == 0):
             with torch.no_grad():
                 eval_cam = allCameras[random.randint(0, len(allCameras) -1)]
-                # render_results = render(eval_cam, scene.gaussians, pipe, bg, return_depth=True, return_normal=True, return_opacity=True)
-                render_results = render(viewpoint_cam, GsDict[f'gs{i}'], pipe, bg)
-                # RenderDict[f"render_pkg_gs{i}"] = render(viewpoint_cam, GsDict[f'gs{i}'], pipe, bg)
-
+                
+                render_results = render(viewpoint_cam, GsDict[f'gs0'], pipe, bg)
                 image = torch.clamp(render_results["render"], 0.0, 1.0)
-                # print(f"image.shape is {image.shape}")
                 gt_image = torch.clamp(eval_cam.original_image.to("cuda"), 0.0, 1.0)
                 black = torch.zeros_like(gt_image).to(gt_image.device)
-
                 render_depth = render_results["depth"]
-                # print(f"render_depth.shape is {render_depth.shape}")
                 render_depth_image = depth2image(render_depth, inverse=True, rgb=True)
-
-                # render_normal = render_results["render_normal"]
-                # render_normal_image = normal2image(render_normal, inverse=True)
-                # print(f"alpha.shape is {render_results['alpha'].shape}")
                 render_opacity_image = render_results["alpha"].repeat(3, 1, 1)
+
+                render_results_gs1 = render(viewpoint_cam, GsDict[f'gs1'], pipe, bg)
+                image_gs1 = torch.clamp(render_results_gs1["render"], 0.0, 1.0)
+                render_depth_gs1 = render_results_gs1["depth"]
+                render_depth_image_gs1 = depth2image(render_depth_gs1, inverse=True, rgb=True)
+                render_opacity_image_gs1 = render_results_gs1["alpha"].repeat(3, 1, 1)
 
             row0 = torch.cat([gt_image, black, black], dim=2)
             row1 = torch.cat([image, render_depth_image, render_opacity_image], dim=2)
+            row2 = torch.cat([image_gs1, render_depth_image_gs1, render_opacity_image_gs1], dim=2)
             
-            image_to_show = torch.cat([row0, row1], dim=1)
+            image_to_show = torch.cat([row0, row1, row2], dim=1)
             image_to_show = torch.clamp(image_to_show, 0, 1)
             
             os.makedirs(f"{dataset.model_path}/log_images_train", exist_ok = True)
@@ -350,17 +348,21 @@ def training_report(args, tb_writer, iteration, loss, l1_loss, testing_iteration
                     if i != 0:
                         MetricDict[f"l1_test_gs{i}"], MetricDict[f"psnr_test_gs{i}"], MetricDict[f"ssim_test_gs{i}"], MetricDict[f"lpips_test_gs{i}"] = 0.0, 0.0, 0.0, 0.0
                 for idx, viewpoint in enumerate(config['cameras']):
-                    RenderResults = {}
-
-                    render_results = renderFunc(viewpoint, scene.gaussians, *renderArgs)
-                    render_image = torch.clamp(render_results["render"], 0.0, 1.0)
-
-                    render_depth = render_results["depth"]
-                    render_depth_image = depth2image(render_depth, inverse=True, rgb=depth_rgb)
-                    alpha = render_results["alpha"]
-                    render_opacity_image = render_results["alpha"].repeat(3, 1, 1)
                     gt_image = torch.clamp(viewpoint.original_image.to("cuda"), 0.0, 1.0)   
                     black = torch.zeros_like(gt_image).to(gt_image.device) 
+                    RenderResults = {}
+                    
+                    render_results = renderFunc(viewpoint, scene.gaussians, *renderArgs)
+                    render_image = torch.clamp(render_results["render"], 0.0, 1.0)
+                    render_depth = render_results["depth"]
+                    render_depth_image = depth2image(render_depth, inverse=True, rgb=depth_rgb)
+                    render_opacity_image = render_results["alpha"].repeat(3, 1, 1)
+
+                    render_results_gs1 = renderFunc(viewpoint, GsDict['gs1'], *renderArgs)
+                    render_image_gs1 = torch.clamp(render_results_gs1["render"], 0.0, 1.0)
+                    render_depth_gs1 = render_results_gs1["depth"]
+                    render_depth_image_gs1 = depth2image(render_depth_gs1, inverse=True, rgb=depth_rgb)
+                    render_opacity_image_gs1 = render_results_gs1["alpha"].repeat(3, 1, 1)
 
                                
 
@@ -368,8 +370,9 @@ def training_report(args, tb_writer, iteration, loss, l1_loss, testing_iteration
                     if tb_writer and (idx < 8):
                         row0 = torch.cat([gt_image, black, black], dim=2)
                         row1 = torch.cat([render_image, render_depth_image, render_opacity_image], dim=2)
+                        row2 = torch.cat([render_image_gs1, render_depth_image_gs1, render_opacity_image_gs1], dim=2)
                         
-                        image_to_show = torch.cat([row0, row1], dim=1)
+                        image_to_show = torch.cat([row0, row1, row2], dim=1)
                         image_to_show = torch.clamp(image_to_show, 0, 1)
                         
                         save_path = f"{args.model_path}/save_images_{config['name']}/view_{viewpoint.image_name}"
