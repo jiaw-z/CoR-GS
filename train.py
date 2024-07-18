@@ -199,7 +199,7 @@ def training(dataset, opt, pipe, args):
             with torch.no_grad():
                 eval_cam = allCameras[random.randint(0, len(allCameras) -1)]
                 
-                render_results = render(viewpoint_cam, GsDict[f'gs0'], pipe, bg)
+                render_results = render(eval_cam, GsDict[f'gs0'], pipe, bg)
                 image = torch.clamp(render_results["render"], 0.0, 1.0)
                 gt_image = torch.clamp(eval_cam.original_image.to("cuda"), 0.0, 1.0)
                 black = torch.zeros_like(gt_image).to(gt_image.device)
@@ -207,7 +207,7 @@ def training(dataset, opt, pipe, args):
                 render_depth_image = depth2image(render_depth, inverse=True, rgb=True)
                 render_opacity_image = render_results["alpha"].repeat(3, 1, 1)
 
-                render_results_gs1 = render(viewpoint_cam, GsDict[f'gs1'], pipe, bg)
+                render_results_gs1 = render(eval_cam, GsDict[f'gs1'], pipe, bg)
                 image_gs1 = torch.clamp(render_results_gs1["render"], 0.0, 1.0)
                 render_depth_gs1 = render_results_gs1["depth"]
                 render_depth_image_gs1 = depth2image(render_depth_gs1, inverse=True, rgb=True)
