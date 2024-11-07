@@ -200,11 +200,11 @@ def pipeline(scene, base_path, n_views):
     os.system('colmap patch_match_stereo --workspace_path dense')
     os.system('colmap stereo_fusion --workspace_path dense --output_path dense/fused.ply')
 
-for scene in ['scan21', 'scan30', 'scan31', 'scan34', 'scan38', 'scan40', 'scan41', 'scan45', 'scan55', 'scan63', 'scan82', 'scan103', 'scan110', 'scan114']:
-    pipeline(scene, base_path = '/data1/DTU/Rectified/', n_views = 9)
-# for scene in ['scan21', 'scan30', 'scan31', 'scan34', 'scan38', 'scan40', 'scan41', 'scan45', 'scan55', 'scan63', 'scan82', 'scan103', 'scan110', 'scan114']:
+# for scene in ['scan8', 'scan21', 'scan30', 'scan31', 'scan34', 'scan38', 'scan40', 'scan41', 'scan45', 'scan55', 'scan63', 'scan82', 'scan103', 'scan110', 'scan114']:
+#     pipeline(scene, base_path = '/data1/DTU/Rectified/', n_views = 9)
+# for scene in ['scan8','scan21', 'scan30', 'scan31', 'scan34', 'scan38', 'scan40', 'scan41', 'scan45', 'scan55', 'scan63', 'scan82', 'scan103', 'scan110', 'scan114']:
 #     pipeline(scene, base_path = '/data1/DTU/Rectified/', n_views = 6)
-# for scene in ['scan21', 'scan30', 'scan31', 'scan34', 'scan38', 'scan40', 'scan41', 'scan45', 'scan55', 'scan63', 'scan82', 'scan103', 'scan110', 'scan114']:
-#     pipeline(scene, base_path = '/data1/DTU/Rectified/', n_views = 3)
+for scene in ['scan8', 'scan21', 'scan30', 'scan31', 'scan34', 'scan38', 'scan40', 'scan41', 'scan45', 'scan55', 'scan63', 'scan82', 'scan103', 'scan110', 'scan114']:
+    pipeline(scene, base_path = '/data1/DTU/Rectified/', n_views = 3)
 
 

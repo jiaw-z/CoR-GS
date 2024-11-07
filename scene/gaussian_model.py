@@ -63,7 +63,8 @@ class GaussianModel:
         self.setup_functions()
         self.bg_color = torch.empty(0)
         self.confidence = torch.empty(0)
-        self.absdensify = args.absdensify
+        # self.absdensify = args.absdensify
+        self.absdensify = False
 
     def capture(self):
         return (

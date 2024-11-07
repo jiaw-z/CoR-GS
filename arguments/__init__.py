@@ -98,6 +98,7 @@ class OptimizationParams(ParamGroup):
         self.sample_pseudo_interval = 1
         self.dist_thres = 10.
         self.random_background = False
+        self.absdensify = False
         
         super().__init__(parser, "Optimization Parameters")
 

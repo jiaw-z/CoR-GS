@@ -192,4 +192,6 @@ def pipeline(scene, base_path, n_views):
 
 
 for scene in ['fern', 'flower', 'fortress',  'horns',  'leaves',  'orchids',  'room',  'trex']:# ['bonsai', 'counter', 'garden', 'kitchen', 'room', 'stump']:
-    pipeline(scene, base_path = '/data/mipnerf360/', n_views = 3)  # please use absolute path!
+    pipeline(scene, base_path = '/data1/gary/data/debug/nerf_llff_data/', n_views = 6)  # please use absolute path!
+
+# pipeline('fern', base_path = '/data1/gary/data/debug/nerf_llff_data/', n_views = 3)
