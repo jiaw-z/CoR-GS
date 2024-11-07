@@ -27,14 +27,20 @@ pip install gaussian-splatting/submodules/simple-knn
 ## Required Data
 ```
 ├── /data
-    ├── mipnerf360
+   ├── mipnerf360
         ├── bicycle
         ├── bonsai
         ├── ...
-    ├── nerf_llff_data
+   ├── nerf_llff_data
         ├── fern
         ├── flower
         ├── ...
+   ├── DTU
+        ├── Rectified
+            ├── scan1
+            ├── scan2
+            ├── ...
+        ├── submission_data
 ```
 
 ## Evaluation
@@ -91,21 +97,18 @@ pip install gaussian-splatting/submodules/simple-knn
    - Poses: following [gaussian-splatting](https://github.com/graphdeco-inria/gaussian-splatting), run `convert.py` to get the poses and the undistorted images by COLMAP.
    - Render Path: following [LLFF](https://github.com/Fyusion/LLFF) to get the `poses_bounds.npy` from the COLMAP data.
 
-4. Set the mask path and the expected output model path in `copy_mask_dtu.sh` for evaluation. (default: "data/DTU/submission_data/idrmasks" and "output/DTU") 
 
-
-5. run colmap to obtain initial point clouds with limited viewpoints:
+4. run colmap to obtain initial point clouds with limited viewpoints:
     ```bash
    python tools/colmap_dtu.py
    ```
    When sparse views are used as input, COLMAP may fail due to poor co-visibility relationships between input images. In our tests, this issue can occur in some scenes within the 3-view DTU and 8-view Blender datasets. In these cases, we use random point clouds for initialization (--rand_pcd).
 
 
-6. Start training and testing:
+5. Start training and testing:
 
    ```bash
-   # for example
-   bash scripts/run_dtu.sh ${gpu_id} data/DTU/scan8 output/DTU/scan8
+   python scripts/run_dtu.py
    ```
 
 
