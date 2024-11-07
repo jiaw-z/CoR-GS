@@ -165,7 +165,7 @@ def training(dataset, opt, pipe, args):
                 LossDict[f"loss_gs{i}"] = loss_photometric(RenderDict[f"image_gs{i}"], gt_image, opt=opt)
 
         if not args.onlyrgb:
-            if  iteration % args.sample_pseudo_interval == 0 and iteration <= args.end_sample_pseudo:
+            if iteration % args.sample_pseudo_interval == 0 and iteration <= args.end_sample_pseudo:
                 loss_scale = min((iteration - args.start_sample_pseudo) / 500., 1)
                 if not pseudo_stack_co:
                     pseudo_stack_co = scene.getPseudoCameras().copy()
@@ -332,7 +332,7 @@ def training_report(args, tb_writer, iteration, loss, l1_loss, testing_iteration
         tb_writer.add_scalar('train_loss_patches/total_loss', loss.item(), iteration)
                 
     if 'DTU' in scene.source_path:
-        depth_rgb = False
+        depth_rgb = True
     else:
         depth_rgb = True
     # Report test and samples of training set
@@ -448,6 +448,8 @@ if __name__ == "__main__":
     parser.add_argument('--coprune_threshold', type=int, default=5)
 
     parser.add_argument("--save_log_images", action="store_true")
+
+    # parser.add_argument("--absdensify", action="store_true")
 
     args = parser.parse_args(sys.argv[1:])
     args.save_iterations.append(args.iterations)
