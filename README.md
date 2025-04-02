@@ -43,6 +43,11 @@ pip install gaussian-splatting/submodules/simple-knn
         ├── submission_data
 ```
 
+## Preprocessed Dataset
+
+There are the processed datasets used in CoR-GS, with which the data preprocessed steps can be skipped:
+1. [DTU 3,6,9 views](https://drive.google.com/file/d/1ibu2-Naueh-Vb0ILj0DCU-h4Pxi5EdYY/view?usp=sharing)
+
 ## Evaluation
 
 ### LLFF
